@@ -5,8 +5,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.xml.ws.http.HTTPException;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -19,12 +17,11 @@ import java.net.URLEncoder;
 
 public class RESTHelper {
 	
-	public static String getBearerToken(String consumerKey, String consumerSecret, String applicationName, String endPointAuthUrl) throws IOException
+	public static String getBearerToken(HttpsURLConnection connection, String consumerKey, String consumerSecret, String applicationName, String endPointAuthUrl) throws IOException
 	{
 		String tokenType = null;
 		String token = null;
 		JSONObject obj = null;
-        HttpsURLConnection connection = null;
         
         //encode the credentials according to OAuth2 spec
 		String encodedCredentials = encodeKeys(consumerKey, consumerSecret);
@@ -69,17 +66,16 @@ public class RESTHelper {
                 return ((tokenType.equals("bearer")) && (token != null)) ? token : "";
             }   	       
 		}
-		catch (HTTPException e)
+		catch (ProtocolException e)
 		{
 			e.printStackTrace();
 		}
         return null;
 	}
 	
-	public static String submit(String bearerToken, String applicationName, String endPointUrl) throws IOException
+	public static String submit(HttpsURLConnection connection, String bearerToken, String applicationName, String endPointUrl) throws IOException
 	{
 		String response = null;
-        HttpsURLConnection connection = null;
         
 		URL url = new URL(endPointUrl);
         try {

@@ -1,4 +1,7 @@
-﻿create sequence staging.twittersearch_id_seq start 1000000000;
+﻿drop table staging.twitter_search cascade;
+drop sequence staging.twittersearch_id_seq;
+
+create sequence staging.twittersearch_id_seq start 1000000000;
 
 create table staging.twitter_search
 (
@@ -11,4 +14,4 @@ create table staging.twitter_search
 	constraint staging_twittersearch_pk primary key (id)
 );
 
-create unique index staging_twittersearch_tweetid_unq on staging.twitter_search (tweet_id);
+create unique index staging_twittersearch_unq on staging.twitter_search (tweet_id);

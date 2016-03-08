@@ -2,27 +2,23 @@ package com.letoconsulting.app.TwitterRESTClient;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLEncoder;
 
+import javax.net.ssl.HttpsURLConnection;
+
 public class TwitterRequest {
-    private String consumerKey;
-    private String consumerSecret;
-    private String applicationName;
-    private String endPointAuthUrl;
-    private String endPointUrl;
-    private String bearerToken;
-	
+	private HttpsURLConnection connection = null;
+    private String consumerKey = null;
+    private String consumerSecret = null;
+    private String applicationName = null;
+    private String endPointAuthUrl = null;
+    private String endPointUrl = null;
+    private String bearerToken = null;
+	 
 	//constructor
-	public TwitterRequest(String consumerKey, String consumerSecret, String applicationName, String endPointAuthUrl) throws IOException
-	{
-	    this.setConsumerKey(consumerKey);
-	    this.setConsumerSecret(consumerSecret);
-	    this.setApplicationName(applicationName);
-	    this.setEndPointAuthUrl(endPointAuthUrl);
-	    this.setEndPointUrl("https://api.twitter.com/1.1/search/tweets.json?q=");
-	    
-	    String token = RESTHelper.getBearerToken(this.consumerKey, this.consumerSecret, this.applicationName, this.endPointAuthUrl);
-	    this.setBearerToken(token);	    	    
+	public TwitterRequest()
+	{  	    
 	}
 	
 	public String Search(String query)
@@ -32,7 +28,7 @@ public class TwitterRequest {
 		
 		try {
 			encoded_query = URLEncoder.encode(query, "ISO-8859-1");
-			response = RESTHelper.submit(this.getBearerToken(), this.getApplicationName(), endPointUrl + encoded_query);
+			response = RESTHelper.submit(this.connection, this.getBearerToken(), this.getApplicationName(), endPointUrl + encoded_query);
 			return response;
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -51,7 +47,7 @@ public class TwitterRequest {
 		
 		try {
 			encoded_query = URLEncoder.encode(query, "ISO-8859-1");
-			response = RESTHelper.submit(this.getBearerToken(), this.getApplicationName(), endPointUrl + encoded_query);
+			response = RESTHelper.submit(this.connection, this.getBearerToken(), this.getApplicationName(), endPointUrl + encoded_query);
 			return response;
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -62,7 +58,25 @@ public class TwitterRequest {
 		}
 		return null;
 	}
+	
+	public void open(String consumerKey, String consumerSecret, String applicationName, String endPointAuthUrl) throws IOException
+	{
+	    this.setConsumerKey(consumerKey);
+	    this.setConsumerSecret(consumerSecret);
+	    this.setApplicationName(applicationName);
+	    this.setEndPointAuthUrl(endPointAuthUrl);
+	    this.setEndPointUrl("https://api.twitter.com/1.1/search/tweets.json?q=");
+	    
+        URL url = new URL(endPointAuthUrl);
+        this.connection = (HttpsURLConnection) url.openConnection();
+	    String token = RESTHelper.getBearerToken(this.connection, this.consumerKey, this.consumerSecret, this.applicationName, this.endPointAuthUrl);
+	    this.setBearerToken(token);	  
+	}
 
+	public void close()
+	{
+		this.connection.disconnect();
+	}
 	
 	/* Getters and Setters */
 	
