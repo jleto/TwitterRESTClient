@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<project name="TwitterRESTClient" default="dist" basedir=".." xmlns:ivy="antlib:org.apache.ivy.ant">
+	<description>
+        Build file for a Twitter REST Client
+    </description>
+
+	<!-- you can use this file to set the kettle-dir property or change it directly below -->
+	<property file="build/build.properties" />
+
+	<!-- set global properties for this build -->
+	<property name="src" location="src" />
+	<property name="classes" location="classes" />
+	<property name="dist" location="dist" />
+	<property name="jarfilename" value="TwitterRESTClient.jar" />
+
+	<!-- used to compile code -->
+	<path id="compile.classpath">
+		<fileset dir="${basedir}/lib">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="init">
+		<tstamp />
+	</target>
+
+	<target name="compile" depends="init, resolve" description="compile the source ">
+		<mkdir dir="${classes}" />
+		<javac includeantruntime="false" source="1.6" target="1.6" srcdir="${src}" destdir="${classes}" debuglevel="lines,vars,source" debug="true">
+			<classpath refid="compile.classpath" />		
+		</javac>
+	</target>
+	
+    <!-- ================================= 
+          target: resolve              
+         ================================= -->
+    <target name="resolve" description="--> retrieve dependencies with ivy">
+        <ivy:retrieve />
+    </target>
+
+	<target name="dist" depends="compile" description="generate the distribution">
+
+		<mkdir dir="${dist}" />
+
+		<!-- jar things up, also add the properties files (messages) and the icon -->
+		<copy todir="${classes}">
+			<fileset dir="${src}" includes="**/*.properties" />
+			<fileset dir="${src}" includes="**/*.png,**/*.svg" />
+		</copy>
+
+		<!-- jar class up -->
+		<jar jarfile="${dist}/${jarfilename}" basedir="${classes}"/>
+
+	</target>
+
+	<target name="install" depends="dist" description="compile and install into kettle plugin project library">
+
+		<!-- remove previous installations -->
+		<delete file="${kettle-plugin-dir}/lib/${jarfilename}"/>
+		<delete file="/opt/pentaho/lib/steps/${jarfilename}"/>
+		<delete file="/opt/pentaho/lib/steps/${jarfilename}"/>
+		<delete file="/opt/pentaho/lib/${jarfilename}"/>
+		<delete file="/opt/pentaho/plugins/steps/${jarfilename}"/>
+
+		<copy todir="${kettle-plugin-dir}/lib">
+			<fileset dir="${dist}" includes="**/*.*" />
+			<fileset dir="${dist}" includes="**" />
+		</copy>
+
+		<copy todir="/opt/pentaho/lib">
+			<fileset dir="${dist}">
+				<include name="${jarfilename}"/>
+			</fileset>
+		</copy>
+
+
+	</target>
+
+	<target name="clean" description="clean up">
+		<delete dir="${classes}" />
+		<delete dir="${dist}" />
+	</target>
+
+</project>
