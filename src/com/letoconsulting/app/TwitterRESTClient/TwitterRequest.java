@@ -61,16 +61,43 @@ public class TwitterRequest {
 	
 	public void open(String consumerKey, String consumerSecret, String applicationName, String endPointAuthUrl) throws IOException
 	{
-	    this.setConsumerKey(consumerKey);
-	    this.setConsumerSecret(consumerSecret);
-	    this.setApplicationName(applicationName);
-	    this.setEndPointAuthUrl(endPointAuthUrl);
-	    this.setEndPointUrl("https://api.twitter.com/1.1/search/tweets.json?q=");
-	    
-        URL url = new URL(endPointAuthUrl);
-        this.connection = (HttpsURLConnection) url.openConnection();
-	    String token = RESTHelper.getBearerToken(this.connection, this.consumerKey, this.consumerSecret, this.applicationName, this.endPointAuthUrl);
-	    this.setBearerToken(token);	  
+		try {
+			if (this.connection != null)
+			{
+				if (connection.getResponseCode() != 200 || this.getBearerToken() == null)
+				{
+					this.close();
+				    this.setConsumerKey(consumerKey);
+				    this.setConsumerSecret(consumerSecret);
+				    this.setApplicationName(applicationName);
+				    this.setEndPointAuthUrl(endPointAuthUrl);
+				    this.setEndPointUrl("https://api.twitter.com/1.1/search/tweets.json?q=");
+				    
+			        URL url = new URL(endPointAuthUrl);
+			        this.connection = (HttpsURLConnection) url.openConnection();			        
+			        
+			        String token = RESTHelper.getBearerToken(this.connection, this.consumerKey, this.consumerSecret, this.applicationName, this.endPointAuthUrl);
+			        this.setBearerToken(token);				    				    
+				}
+			}
+			else {	
+			    this.setConsumerKey(consumerKey);
+			    this.setConsumerSecret(consumerSecret);
+			    this.setApplicationName(applicationName);
+			    this.setEndPointAuthUrl(endPointAuthUrl);
+			    this.setEndPointUrl("https://api.twitter.com/1.1/search/tweets.json?q=");
+			    
+		        URL url = new URL(endPointAuthUrl);
+		        this.connection = (HttpsURLConnection) url.openConnection();
+		        String token = RESTHelper.getBearerToken(this.connection, this.consumerKey, this.consumerSecret, this.applicationName, this.endPointAuthUrl);
+		        this.setBearerToken(token);			     
+			}
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			throw new IOException();
+		}
 	}
 
 	public void close()
